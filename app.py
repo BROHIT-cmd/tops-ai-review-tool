@@ -3,82 +3,58 @@ from pypdf import PdfReader
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
 import io
+import os
 
 # -----------------------------------
 # ✅ PAGE CONFIG
 # -----------------------------------
-st.set_page_config(page_title="AI Drawing Review", layout="wide")
+st.set_page_config(page_title="AI Assisted TOPS Drawing review Tool", layout="wide")
 
 # -----------------------------------
-# ✅ CLEAN WHITE STYLE (NO BORDER)
+# ✅ CLEAN WHITE UI
 # -----------------------------------
 st.markdown("""
 <style>
-
-/* ✅ White background */
-.stApp {
-    background-color: white;
-    color: black;
+.stApp { background-color: white; color: black; }
+.header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.score-box {
+    background-color: #f3f4f6;
+    padding: 6px;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bold;
 }
-
-/* ✅ Top-right logo */
-.header {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
+.comment-box {
+    background-color: #f9fafb;
+    padding: 8px;
+    margin-bottom: 3px;
+    border-left: 2px solid #dc2626;
 }
-
-/* ✅ Buttons */
 .stButton button {
     background-color: #1F6FEB;
     color: white;
     border-radius: 6px;
-    padding: 8px;
-    font-weight: bold;
 }
-
-/* ✅ Download buttons */
 .stDownloadButton button {
     background-color: #2da44e;
     color: white;
-    border-radius: 6px;
 }
-
-/* ✅ Score */
-.score-box {
-    background-color: #f3f4f6;
-    padding: 12px;
-    border-radius: 6px;
-    text-align: center;
-    font-size: 20px;
-    font-weight: bold;
-    margin-top: 10px;
-}
-
-/* ✅ Comments */
-.comment-box {
-    background-color: #f9fafb;
-    padding: 8px;
-    margin-bottom: 6px;
-    border-left: 4px solid #dc2626;
-    border-radius: 4px;
-}
-
 </style>
 """, unsafe_allow_html=True)
 
 # -----------------------------------
-# ✅ HEADER (LOGO RIGHT)
+# ✅ HEADER
 # -----------------------------------
 st.markdown('<div class="header">', unsafe_allow_html=True)
 try:
-    st.image("logo.png", width=200)
+    st.image("logo.png", width=200, height=180)
 except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------
-# ✅ TITLE + DESCRIPTION
+# ✅ TITLE
 # -----------------------------------
 st.title("AI Assisted TOPS Drawing review Tool")
 
@@ -87,24 +63,25 @@ st.caption(
 )
 
 # -----------------------------------
-# ✅ UPLOAD SECTION
+# ✅ FILE UPLOAD (MULTI PDF)
 # -----------------------------------
-st.markdown("### Please upload TOPS PS drawing PDF")
+st.markdown("### Please upload TOPS PS drawings PDF")
 
-uploaded_file = st.file_uploader(
-    "Upload PDF file",
-    type="pdf"
+uploaded_files = st.file_uploader(
+    "Upload PDF files",
+    type="pdf",
+    accept_multiple_files=True
 )
 
 # -----------------------------------
-# ✅ PDF FUNCTION
+# ✅ PDF REPORT FUNCTION
 # -----------------------------------
 def create_pdf(comments, score):
     buffer = io.BytesIO()
     c = canvas.Canvas(buffer, pagesize=letter)
 
-    c.drawString(30, 750, "AI Drawing Review Report")
-    c.drawString(30, 730, f"Score: {score}/100")
+    c.drawString(100, 750, "AI Drawing Review Report")
+    c.drawString(100, 730, f"Score: {score}/100")
 
     y = 700
     for comment in comments:
@@ -116,63 +93,69 @@ def create_pdf(comments, score):
     return buffer
 
 # -----------------------------------
-
-#✅ MAIN LOGIC (MULTI-PAGE HANDLE)
+# ✅ MAIN LOGIC
 # -----------------------------------
-if uploaded_file:
-
-    reader = PdfReader(uploaded_file)
-
-    st.info(f"📄 Total Pages Detected: {len(reader.pages)}")
+if uploaded_files:
 
     full_text = ""
 
-    # ✅ LOOP THROUGH ALL PAGES
-    for i, page in enumerate(reader.pages):
-        page_text = page.extract_text()
+    for file in uploaded_files:
+        st.subheader(f"📄 Processing: {file.name}")
 
-        if page_text:
-            st.write(f"✅ Page {i+1} processed successfully")
-            full_text += " " + page_text
-        else:
-            st.warning(f"⚠️ Page {i+1} has no readable text (possibly scanned image)")
+        reader = PdfReader(file)
+        st.write(f"Total Pages: {len(reader.pages)}")
+
+        # ✅ MULTI-PAGE LOOP
+        for i, page in enumerate(reader.pages):
+            page_text = page.extract_text()
+
+            if page_text:
+                st.write(f"✅ Page {i+1}")
+                full_text += " " + page_text
+            else:
+                st.warning(f"⚠️ Page {i+1} has no readable text")
 
     full_text = full_text.lower()
 
-    st.success("✅ Drawing Loaded Successfully")
+    st.success("✅ All PDFs loaded successfully")
 
-
+    # ✅ Prepare variables
     comments = []
     score = 100
 
-def check_rule(keyword, message, penalty=3):
-    if keyword not in full_text:
-        comments.append(message)
-        return penalty
-    return 0
+    # ✅ RULE FUNCTION
+    def check_rule(keyword, message, penalty=3):
+        if keyword not in full_text:
+            comments.append(message)
+            return penalty
+        return 0
 
-    try:
-        with open("Checklist.txt", "r", encoding="utf-8") as file:
-            rules = file.readlines()
-
-        for rule in rules:
-            rule = rule.strip().lower()
-            if rule and not rule.startswith("#"):
-                score -= check_rule(rule, f"⚠️ {rule} missing")
-
-    except:
-        st.error("❌ Checklist file not found")
-
+    # ✅ RUN REVIEW BUTTON
     if st.button("🚀 Run Review"):
+
+        try:
+            base_path = os.path.dirname(__file__)
+            checklist_path = os.path.join(base_path, "Checklist.txt")
+
+            with open(checklist_path, "r", encoding="utf-8") as file:
+                rules = file.readlines()
+
+            for rule in rules:
+                rule = rule.strip().lower()
+                if rule and not rule.startswith("#"):
+                    score -= check_rule(rule, f"⚠️ {rule} missing")
+
+        except:
+            st.error("❌ Checklist file not found")
 
         score = max(score, 0)
 
-        # ✅ Score display
+        # ✅ SCORE
         st.markdown(f"""
         <div class="score-box">Score: {score}/100</div>
         """, unsafe_allow_html=True)
 
-        # ✅ Status
+        # ✅ STATUS
         if score >= 90:
             st.success("✅ Excellent Design")
         elif score >= 70:
@@ -180,7 +163,7 @@ def check_rule(keyword, message, penalty=3):
         else:
             st.error("❌ Major Issues Found")
 
-        # ✅ Comments
+        # ✅ COMMENTS
         st.subheader("📋 Issues Found")
 
         if comments:
@@ -209,4 +192,5 @@ def check_rule(keyword, message, penalty=3):
 # ✅ FOOTER
 # -----------------------------------
 st.markdown("---")
-st.caption("AI-assisted tool | Final validation by design engineer required")
+st.caption("AI-assisted tool | Final review by design engineer required")
+``
