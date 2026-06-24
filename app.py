@@ -10,12 +10,12 @@ import io
 st.set_page_config(page_title="AI Drawing Review", layout="wide")
 
 # -----------------------------------
-# ✅ SIMPLE CLEAN WHITE STYLE
+# ✅ CLEAN WHITE STYLE + BORDER
 # -----------------------------------
 st.markdown("""
 <style>
 
-/* ✅ Background */
+/* ✅ White background */
 .stApp {
     background-color: white;
     color: black;
@@ -28,18 +28,20 @@ st.markdown("""
     margin-bottom: 10px;
 }
 
-/* ✅ Main container */
+/* ✅ MAIN BORDER BOX */
 .main-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 25px;
-    background-color: #fafafa;
+    border: 1px solid #d1d5db;
+    border-radius: 12px;
+    padding: 30px;
+    background-color: #ffffff;
+    margin-top: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 
-/* ✅ Reduce upload box height */
+/* ✅ Reduce upload spacing */
 .stFileUploader > div {
-    padding-top: 8px;
-    padding-bottom: 8px;
+    padding-top: 6px;
+    padding-bottom: 6px;
 }
 
 /* ✅ Buttons */
@@ -69,7 +71,7 @@ st.markdown("""
     margin-top: 10px;
 }
 
-/* ✅ Comments */
+/* ✅ Comment box */
 .comment-box {
     background-color: #f9fafb;
     padding: 8px;
@@ -86,53 +88,34 @@ st.markdown("""
 # -----------------------------------
 st.markdown('<div class="header">', unsafe_allow_html=True)
 try:
-    st.image("logo.png", width=180)
+    st.image("logo.png", width=160)
 except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
 
+# -----------------------------------
+# ✅ TITLE + DESCRIPTION
+# -----------------------------------
+st.title("AI-Assisted TOPS Drawing Validation System")
+
+st.caption(
+    "Validates TOPS pumping station drawings using checklist-based rules and generates review comments with scoring."
+)
 
 # -----------------------------------
-# ✅ TITLE
-# -----------------------------------
-st.title("TOPS PS Drawing Review Tool")
-st.caption("Tool Description - Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
-
-# -----------------------------------
-# ✅ MAIN CARD
+# ✅ MAIN CARD START
 # -----------------------------------
 st.markdown('<div class="main-card">', unsafe_allow_html=True)
 
 # -----------------------------------
-# ✅ CLEAN UPLOAD SECTION
+# ✅ UPLOAD SECTION
 # -----------------------------------
 st.markdown("### Please upload TOPS PS drawing PDF")
 
-uploaded_file = None
-
 uploaded_file = st.file_uploader(
-    "",
-    type="pdf",
-    label_visibility="collapsed"
+    "Upload PDF file",
+    type="pdf"
 )
-
-st.markdown("""
-<style>
-
-/* ✅ Make upload area transparent */
-[data-testid="stFileUploaderDropzone"] {
-    background: transparent;
-    border: none;
-}
-
-/* ✅ Remove border */
-[data-testid="stFileUploader"] {
-    border: none;
-}
-
-</style>
-""", unsafe_allow_html=True)
-
 
 # -----------------------------------
 # ✅ PDF REPORT FUNCTION
@@ -162,9 +145,9 @@ if uploaded_file is not None:
     text = ""
 
     for page in reader.pages:
-        extracted = page.extract_text()
-        if extracted:
-            text += extracted
+        page_text = page.extract_text()
+        if page_text:
+            text += page_text
 
     text = text.lower()
 
@@ -180,8 +163,8 @@ if uploaded_file is not None:
         return 0
 
     try:
-        with open("Checklist.txt", "r", encoding="utf-8") as f:
-            rules = f.readlines()
+        with open("Checklist.txt", "r", encoding="utf-8") as file:
+            rules = file.readlines()
 
         for rule in rules:
             rule = rule.strip().lower()
@@ -195,12 +178,12 @@ if uploaded_file is not None:
 
         score = max(score, 0)
 
-        # ✅ Score display
+        # ✅ SCORE DISPLAY
         st.markdown(f"""
         <div class="score-box">Score: {score}/100</div>
         """, unsafe_allow_html=True)
 
-        # ✅ Status
+        # ✅ STATUS
         if score >= 85:
             st.success("✅ Excellent Design")
         elif score >= 70:
@@ -208,7 +191,7 @@ if uploaded_file is not None:
         else:
             st.error("❌ Major Issues Found")
 
-        # ✅ Comments
+        # ✅ COMMENTS
         st.subheader("📋 Issues Found")
 
         if comments:
