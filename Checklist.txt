@@ -1,0 +1,67 @@
+# Geometry
+dia
+deep
+level
+cover level
+tank level
+base level
+min
+slots
+transport
+sectional elevation
+sectional plan
+
+# Pump Information
+pump type
+impeller
+motor rating
+pipework size
+rising main
+level control
+final connection
+termination
+pipe o.d
+flange
+coupler
+
+# System
+inlet
+discharge
+
+# Orientation
+0°
+90°
+180°
+270°
+
+# Vent & Cable
+vent
+cable
+osma
+
+# Control
+float
+
+# Structure
+access
+concrete
+lifting
+rebate
+
+# Notes
+do not scale
+access covers to be supplied
+tolerance
+
+# Title Block
+project
+rev
+date
+dr'n
+chk'd
+APR'l
+client
+authority
+scale
+PROJECT
+REF.
