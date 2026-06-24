@@ -117,7 +117,7 @@ def create_pdf(comments, score):
 
 # -----------------------------------
 
-✅ MAIN LOGIC (MULTI-PAGE HANDLE)
+#✅ MAIN LOGIC (MULTI-PAGE HANDLE)
 # -----------------------------------
 if uploaded_file:
 
