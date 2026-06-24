@@ -145,11 +145,11 @@ if uploaded_file:
     comments = []
     score = 100
 
-    def check_rule(keyword, message, penalty=3):
-        if keyword not in text:
-            comments.append(message)
-            return penalty
-        return 0
+def check_rule(keyword, message, penalty=3):
+    if keyword not in full_text:
+        comments.append(message)
+        return penalty
+    return 0
 
     try:
         with open("Checklist.txt", "r", encoding="utf-8") as file:
