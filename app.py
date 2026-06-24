@@ -116,21 +116,31 @@ def create_pdf(comments, score):
     return buffer
 
 # -----------------------------------
-# ✅ MAIN LOGIC
+
+✅ MAIN LOGIC (MULTI-PAGE HANDLE)
 # -----------------------------------
-if uploaded_file is not None:
+if uploaded_file:
 
     reader = PdfReader(uploaded_file)
-    text = ""
 
-    for page in reader.pages:
+    st.info(f"📄 Total Pages Detected: {len(reader.pages)}")
+
+    full_text = ""
+
+    # ✅ LOOP THROUGH ALL PAGES
+    for i, page in enumerate(reader.pages):
         page_text = page.extract_text()
-        if page_text:
-            text += page_text
 
-    text = text.lower()
+        if page_text:
+            st.write(f"✅ Page {i+1} processed successfully")
+            full_text += " " + page_text
+        else:
+            st.warning(f"⚠️ Page {i+1} has no readable text (possibly scanned image)")
+
+    full_text = full_text.lower()
 
     st.success("✅ Drawing Loaded Successfully")
+
 
     comments = []
     score = 100
