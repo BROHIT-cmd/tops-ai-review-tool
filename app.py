@@ -8,7 +8,7 @@ import io
 # ✅ PAGE CONFIG
 # -----------------------------------
 st.set_page_config(page_title="AI Drawing Review", layout="wide")
-
+st.caption("Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
 # -----------------------------------
 # ✅ SIMPLE CLEAN WHITE STYLE
 # -----------------------------------
