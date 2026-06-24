@@ -72,7 +72,7 @@ st.markdown("""
 # -----------------------------------
 st.markdown('<div class="header">', unsafe_allow_html=True)
 try:
-    st.image("logo.png", width=160)
+    st.image("logo.png", width=200)
 except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
@@ -80,10 +80,10 @@ st.markdown('</div>', unsafe_allow_html=True)
 # -----------------------------------
 # ✅ TITLE + DESCRIPTION
 # -----------------------------------
-st.title("AI-Assisted TOPS Drawing Validation System")
+st.title("AI Assisted TOPS Drawing review Tool")
 
 st.caption(
-    "Validates TOPS pumping station drawings using checklist-based rules and generates review comments with scoring."
+    "Tool Description - This tool automates the validation of TOPS pumping station drawings by analyzing uploaded PDF files against predefined engineering checklists. It helps identify missing or incomplete design elements, provides a compliance score, and generates structured review comments along with downloadable reports. The aim is to support engineers in improving design quality, reducing manual effort, and ensuring consistency across project reviews."
 )
 
 # -----------------------------------
@@ -108,7 +108,7 @@ def create_pdf(comments, score):
 
     y = 700
     for comment in comments:
-        c.drawString(30, y, comment)
+        c.drawString(40, y, comment)
         y -= 15
 
     c.save()
@@ -163,7 +163,7 @@ if uploaded_file is not None:
         """, unsafe_allow_html=True)
 
         # ✅ Status
-        if score >= 85:
+        if score >= 90:
             st.success("✅ Excellent Design")
         elif score >= 70:
             st.warning("⚠️ Needs Improvement")
