@@ -48,7 +48,7 @@ st.markdown("""
 # -----------------------------------
 st.markdown('<div class="header">', unsafe_allow_html=True)
 try:
-    st.image("logo.png", width=200, height=180)
+    st.image("logo.png", width=200)
 except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
