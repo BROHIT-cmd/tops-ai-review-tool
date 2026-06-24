@@ -91,12 +91,12 @@ except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
 
-st.caption("Tool Description - Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
 
 # -----------------------------------
 # ✅ TITLE
 # -----------------------------------
 st.title("TOPS PS Drawing Review Tool")
+st.caption("Tool Description - Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
 
 # -----------------------------------
 # ✅ MAIN CARD
