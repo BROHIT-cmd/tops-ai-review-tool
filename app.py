@@ -8,7 +8,7 @@ import io
 # ✅ PAGE CONFIG
 # -----------------------------------
 st.set_page_config(page_title="AI Drawing Review", layout="wide")
-st.caption("Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
+
 # -----------------------------------
 # ✅ SIMPLE CLEAN WHITE STYLE
 # -----------------------------------
@@ -90,6 +90,8 @@ try:
 except:
     pass
 st.markdown('</div>', unsafe_allow_html=True)
+
+st.caption("Tool Description - Automatically reviews TOPS pumping station drawings using checklist-based validation and provides score with downloadable reports")
 
 # -----------------------------------
 # ✅ TITLE
