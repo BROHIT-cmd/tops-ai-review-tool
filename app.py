@@ -10,7 +10,7 @@ import io
 st.set_page_config(page_title="AI Drawing Review", layout="wide")
 
 # -----------------------------------
-# ✅ CLEAN WHITE STYLE + BORDER
+# ✅ CLEAN WHITE STYLE (NO BORDER)
 # -----------------------------------
 st.markdown("""
 <style>
@@ -26,22 +26,6 @@ st.markdown("""
     display: flex;
     justify-content: flex-end;
     margin-bottom: 10px;
-}
-
-/* ✅ MAIN BORDER BOX */
-.main-card {
-    border: 1px solid #d1d5db;
-    border-radius: 12px;
-    padding: 30px;
-    background-color: #ffffff;
-    margin-top: 15px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-}
-
-/* ✅ Reduce upload spacing */
-.stFileUploader > div {
-    padding-top: 6px;
-    padding-bottom: 6px;
 }
 
 /* ✅ Buttons */
@@ -60,7 +44,7 @@ st.markdown("""
     border-radius: 6px;
 }
 
-/* ✅ Score box */
+/* ✅ Score */
 .score-box {
     background-color: #f3f4f6;
     padding: 12px;
@@ -71,7 +55,7 @@ st.markdown("""
     margin-top: 10px;
 }
 
-/* ✅ Comment box */
+/* ✅ Comments */
 .comment-box {
     background-color: #f9fafb;
     padding: 8px;
@@ -103,11 +87,6 @@ st.caption(
 )
 
 # -----------------------------------
-# ✅ MAIN CARD START
-# -----------------------------------
-st.markdown('<div class="main-card">', unsafe_allow_html=True)
-
-# -----------------------------------
 # ✅ UPLOAD SECTION
 # -----------------------------------
 st.markdown("### Please upload TOPS PS drawing PDF")
@@ -118,7 +97,7 @@ uploaded_file = st.file_uploader(
 )
 
 # -----------------------------------
-# ✅ PDF REPORT FUNCTION
+# ✅ PDF FUNCTION
 # -----------------------------------
 def create_pdf(comments, score):
     buffer = io.BytesIO()
@@ -178,12 +157,12 @@ if uploaded_file is not None:
 
         score = max(score, 0)
 
-        # ✅ SCORE DISPLAY
+        # ✅ Score display
         st.markdown(f"""
         <div class="score-box">Score: {score}/100</div>
         """, unsafe_allow_html=True)
 
-        # ✅ STATUS
+        # ✅ Status
         if score >= 85:
             st.success("✅ Excellent Design")
         elif score >= 70:
@@ -191,7 +170,7 @@ if uploaded_file is not None:
         else:
             st.error("❌ Major Issues Found")
 
-        # ✅ COMMENTS
+        # ✅ Comments
         st.subheader("📋 Issues Found")
 
         if comments:
@@ -215,11 +194,6 @@ if uploaded_file is not None:
             data=pdf,
             file_name="report.pdf"
         )
-
-# -----------------------------------
-# ✅ CLOSE CARD
-# -----------------------------------
-st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------
 # ✅ FOOTER
