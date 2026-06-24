@@ -1,3 +1,4 @@
+
 import streamlit as st
 from pypdf import PdfReader
 from reportlab.lib.pagesizes import letter
@@ -11,34 +12,25 @@ import os
 st.set_page_config(page_title="AI Assisted TOPS Drawing review Tool", layout="wide")
 
 # -----------------------------------
-# ✅ CLEAN WHITE UI
+# ✅ CLEAN UI
 # -----------------------------------
 st.markdown("""
 <style>
 .stApp { background-color: white; color: black; }
-.header { display: flex; justify-content: flex-end; margin-bottom: 10px; }
+.header { display: flex; justify-content: flex-end; }
 .score-box {
     background-color: #f3f4f6;
-    padding: 6px;
+    padding: 12px;
     border-radius: 6px;
     text-align: center;
-    font-size: 30px;
+    font-size: 20px;
     font-weight: bold;
 }
 .comment-box {
     background-color: #f9fafb;
     padding: 8px;
-    margin-bottom: 3px;
-    border-left: 2px solid #dc2626;
-}
-.stButton button {
-    background-color: #1F6FEB;
-    color: white;
-    border-radius: 6px;
-}
-.stDownloadButton button {
-    background-color: #2da44e;
-    color: white;
+    margin-bottom: 6px;
+    border-left: 4px solid red;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -54,142 +46,154 @@ except:
 st.markdown('</div>', unsafe_allow_html=True)
 
 # -----------------------------------
-# ✅ TITLE
+# ✅ TABS (MULTI PAGE)
 # -----------------------------------
-st.title("AI Assisted TOPS Drawing review Tool")
+tab1, tab2 = st.tabs(["🔍 Drawing Review Tool", "📐 Template Drawing"])
 
-st.caption(
-    "Tool Description - This tool automates the validation of TOPS pumping station drawings by analyzing uploaded PDF files against predefined engineering checklists. It helps identify missing or incomplete design elements, provides a compliance score, and generates structured review comments along with downloadable reports. The aim is to support engineers in improving design quality, reducing manual effort, and ensuring consistency across project reviews."
-)
+# ===================================
+# ✅ TAB 1 → MAIN TOOL
+# ===================================
+with tab1:
 
-# -----------------------------------
-# ✅ FILE UPLOAD (MULTI PDF)
-# -----------------------------------
-st.markdown("### Please upload TOPS PS drawings PDF")
+    st.title("AI Assisted TOPS Drawing review Tool")
 
-uploaded_files = st.file_uploader(
-    "Upload PDF files",
-    type="pdf",
-    accept_multiple_files=True
-)
+    st.caption(
+        "Tool Description - This tool automates the validation of TOPS pumping station drawings by analyzing uploaded PDF files against predefined engineering checklists. It helps identify missing or incomplete design elements, provides a compliance score, and generates structured review comments along with downloadable reports. The aim is to support engineers in improving design quality, reducing manual effort, and ensuring consistency across project reviews."
+    )
 
-# -----------------------------------
-# ✅ PDF REPORT FUNCTION
-# -----------------------------------
-def create_pdf(comments, score):
-    buffer = io.BytesIO()
-    c = canvas.Canvas(buffer, pagesize=letter)
+    st.markdown("### Please upload TOPS PS drawing PDF")
 
-    c.drawString(100, 750, "AI Drawing Review Report")
-    c.drawString(100, 730, f"Score: {score}/100")
+    uploaded_files = st.file_uploader(
+        "Upload PDF files",
+        type="pdf",
+        accept_multiple_files=True
+    )
 
-    y = 700
-    for comment in comments:
-        c.drawString(40, y, comment)
-        y -= 15
+    def create_pdf(comments, score):
+        buffer = io.BytesIO()
+        c = canvas.Canvas(buffer, pagesize=letter)
 
-    c.save()
-    buffer.seek(0)
-    return buffer
+        c.drawString(30, 750, "AI Drawing Review Report")
+        c.drawString(30, 730, f"Score: {score}/100")
 
-# -----------------------------------
-# ✅ MAIN LOGIC
-# -----------------------------------
-if uploaded_files:
+        y = 700
+        for comment in comments:
+            c.drawString(40, y, comment)
+            y -= 15
 
-    full_text = ""
+        c.save()
+        buffer.seek(0)
+        return buffer
 
-    for file in uploaded_files:
-        st.subheader(f"📄 Processing: {file.name}")
+    if uploaded_files:
 
-        reader = PdfReader(file)
-        st.write(f"Total Pages: {len(reader.pages)}")
+        for file in uploaded_files:
 
-        # ✅ MULTI-PAGE LOOP
-        for i, page in enumerate(reader.pages):
-            page_text = page.extract_text()
+            st.markdown("---")
+            st.subheader(f"📄 Reviewing: {file.name}")
 
-            if page_text:
-                st.write(f"✅ Page {i+1}")
-                full_text += " " + page_text
-            else:
-                st.warning(f"⚠️ Page {i+1} has no readable text")
+            reader = PdfReader(file)
+            st.write(f"Total Pages: {len(reader.pages)}")
 
-    full_text = full_text.lower()
+            full_text = ""
 
-    st.success("✅ All PDFs loaded successfully")
+            for i, page in enumerate(reader.pages):
+                page_text = page.extract_text()
 
-    # ✅ Prepare variables
-    comments = []
-    score = 100
+                if page_text:
+                    st.write(f"✅ Page {i+1}")
+                    full_text += " " + page_text
+                else:
+                    st.warning(f"⚠️ Page {i+1} has no readable text")
 
-    # ✅ RULE FUNCTION
-    def check_rule(keyword, message, penalty=3):
-        if keyword not in full_text:
-            comments.append(message)
-            return penalty
-        return 0
+            full_text = full_text.lower()
 
-    # ✅ RUN REVIEW BUTTON
-    if st.button("🚀 Run Review"):
+            st.success("✅ Drawing Loaded")
 
-        try:
-            base_path = os.path.dirname(__file__)
-            checklist_path = os.path.join(base_path, "Checklist.txt")
+            comments = []
+            score = 100
 
-            with open(checklist_path, "r", encoding="utf-8") as file:
-                rules = file.readlines()
+            def check_rule(keyword, message, penalty=3):
+                if keyword not in full_text:
+                    comments.append(message)
+                    return penalty
+                return 0
 
-            for rule in rules:
-                rule = rule.strip().lower()
-                if rule and not rule.startswith("#"):
-                    score -= check_rule(rule, f"⚠️ {rule} missing")
+            if st.button(f"🚀 Run Review - {file.name}"):
 
-        except:
-            st.error("❌ Checklist file not found")
+                try:
+                    base_path = os.path.dirname(__file__)
+                    path = os.path.join(base_path, "Checklist.txt")
 
-        score = max(score, 0)
+                    with open(path, "r", encoding="utf-8") as f:
+                        rules = f.readlines()
 
-        # ✅ SCORE
-        st.markdown(f"""
-        <div class="score-box">Score: {score}/100</div>
-        """, unsafe_allow_html=True)
+                    for rule in rules:
+                        rule = rule.strip().lower()
+                        if rule and not rule.startswith("#"):
+                            score -= check_rule(rule, f"⚠️ {rule} missing")
 
-        # ✅ STATUS
-        if score >= 90:
-            st.success("✅ Excellent Design")
-        elif score >= 70:
-            st.warning("⚠️ Needs Improvement")
-        else:
-            st.error("❌ Major Issues Found")
+                except:
+                    st.error("❌ Checklist not found")
 
-        # ✅ COMMENTS
-        st.subheader("📋 Issues Found")
+                score = max(score, 0)
 
-        if comments:
-            for c in comments:
-                st.markdown(f'<div class="comment-box">{c}</div>', unsafe_allow_html=True)
-        else:
-            st.success("✅ No issues found")
+                st.markdown(f"""
+                <div class="score-box">Score: {score}/100</div>
+                """, unsafe_allow_html=True)
 
-        # ✅ TXT DOWNLOAD
-        report_text = "\n".join(comments)
-        st.download_button(
-            "📥 Download TXT",
-            data=report_text,
-            file_name="report.txt"
-        )
+                if score >= 90:
+                    st.success("✅ Excellent")
+                elif score >= 70:
+                    st.warning("⚠️ Needs Improvement")
+                else:
+                    st.error("❌ Major Issues")
 
-        # ✅ PDF DOWNLOAD
-        pdf = create_pdf(comments, score)
-        st.download_button(
-            "📄 Download PDF",
-            data=pdf,
-            file_name="report.pdf"
-        )
+                st.subheader("📋 Issues")
+
+                if comments:
+                    for c in comments:
+                        st.markdown(f'<div class="comment-box">{c}</div>', unsafe_allow_html=True)
+                else:
+                    st.success("✅ No issues")
+
+                base_name = file.name.replace(".pdf", "")
+
+                report_text = "\n".join(comments)
+
+                st.download_button(
+                    f"📥 TXT - {file.name}",
+                    data=report_text,
+                    file_name=f"{base_name}_report.txt"
+                )
+
+                pdf = create_pdf(comments, score)
+
+                st.download_button(
+                    f"📄 PDF - {file.name}",
+                    data=pdf,
+                    file_name=f"{base_name}_report.pdf"
+                )
+
+# ===================================
+# ✅ TAB 2 → TOPS PS DRAWING TEMPLATE IMAGE
+# ===================================
+with tab2:
+
+    st.title("TOPS PS DRAWING TEMPLATE IMAGE")
+
+    st.caption(
+        "This template drawing represents a standard layout of a TOPS Pumping Station (PS). It serves as a reference for key design components, layout arrangement, and essential elements that should be included in engineering drawings. Users can compare their drawings against this template to ensure completeness, consistency, and compliance with project and standard requirements"
+    )
+    st.markdown("### Reference Template")
+
+    try:
+        st.image("TOPS PS Drawing Template.png", use_container_width=True)
+    except:
+        st.warning("⚠️ Template image (tops.png) not found")
 
 # -----------------------------------
 # ✅ FOOTER
 # -----------------------------------
 st.markdown("---")
-st.caption("AI-assisted tool | Final review by design engineer required")
+st.caption("AI-assisted tool | Final validation by design engineer required")
